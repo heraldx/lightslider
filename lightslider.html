@@ -5,11 +5,35 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
 <?php
+function make_thumb($src, $dest, $desired_width) {
+
+    /* read the source image */
+    $source_image = imagecreatefromjpeg($src);
+    $width = imagesx($source_image);
+    $height = imagesy($source_image);
+
+    /* find the "desired height" of this thumbnail, relative to the desired width  */
+    $desired_height = floor($height * ($desired_width / $width));
+
+    /* create a new, "virtual" image */
+    $virtual_image = imagecreatetruecolor($desired_width, $desired_height);
+
+    /* copy source image at a resized size */
+    imagecopyresampled($virtual_image, $source_image, 0, 0, 0, 0, $desired_width, $desired_height, $width, $height);
+
+    /* create the physical thumbnail image to its destination */
+    imagejpeg($virtual_image, $dest);
+}
 /* taken from: https://github.com/eladkarako/download.eladkarako.com */
 $path = 'ftp://admin:herald@herald.ipdisk.co.kr/HDD2/photo/Best/';
 $thumbpath = 'ftp://admin:herald@herald.ipdisk.co.kr/HDD2/photo/Best/';
-//$path = 'img';
-//$path = './' . $path . '/';
+
+$thumb_size = 100;
+
+if (!file_exists($thumbpath)) {
+    mkdir($thumbpath, 0777, true);
+}
+
 $files = array();
 $handle = @opendir($path) or die("Unable to open $path");
 //  $handle = @opendir($path) or die("Unable to open $path");
@@ -17,6 +41,18 @@ while ($file = @readdir($handle))
 ("." !== $file && ".." !== $file) && array_push($files, $file);
 @closedir($handle);
 sort($files); //uksort($files, "strnatcasecmp");
+
+foreach ($files as $filename){
+    //echo $filename + "\n";
+    $src = $path . $filename;
+    $dest = $thumbpath . $filename;
+    //echo 'source file : ' . $src . ' === ' . 'destination file : ' . $dest . "\n";
+    //if (!file_exists($dest) && !is_dir($filename))
+    //    echo $dest . ' file not exist';//make_thumb($src, $dest, $thumb_size);
+    if(!is_dir($src) && !file_exists($dest))
+        make_thumb($src, $dest, $thumb_size);
+        //echo $src . ' is directory';
+}
 
 $files = json_encode($files);
 $path = json_encode($path);
@@ -51,9 +87,9 @@ unset($handle,$ext,$file);
             var thumbpath = <?php echo $thumbpath; ?>
 
             files.forEach(function(filename) {
-                $('#image-gallery').append('<li data-thumb=' + thumbpath + filename + '><img src=' + path + filename + ' /></li>');
-                console.log(filename);
+                    $('#image-gallery').append('<li data-thumb=' + thumbpath + filename + '><img width="474" src=' + path + filename + ' /></li>');
+            console.log(filename);
             });
-        </script>
+</script>
     </body>
 </html>
