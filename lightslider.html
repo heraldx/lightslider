@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<?php
+/* taken from: https://github.com/eladkarako/download.eladkarako.com */
+$path = 'ftp://admin:herald@herald.ipdisk.co.kr/HDD2/photo/Best/';
+$thumbpath = 'ftp://admin:herald@herald.ipdisk.co.kr/HDD2/photo/Best/';
+//$path = 'img';
+//$path = './' . $path . '/';
+$files = array();
+$handle = @opendir($path) or die("Unable to open $path");
+//  $handle = @opendir($path) or die("Unable to open $path");
+while ($file = @readdir($handle)) 
+("." !== $file && ".." !== $file) && array_push($files, $file);
+@closedir($handle);
+sort($files); //uksort($files, "strnatcasecmp");
+
+$files = json_encode($files);
+$path = json_encode($path);
+$thumbpath = json_encode($thumbpath);
+unset($handle,$ext,$file);
+//unset($handle,$ext,$file,$path);
+?>
+<html>
+    <head>
+        <title>herald.ipdisk.co.kr Light Slider</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="text/css" rel="stylesheet" href="css/lightslider.css" />
+        <link rel="stylesheet" href="css/lightslider-common.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> 
+        <script src="js/lightslider.js"></script>
+        <script src="js/lightslider-common.js"></script>
+    </head>
+    <body>
+
+        <div class="demo">
+            <div class="item">            
+                <div class="clearfix" style="max-width:474px;">
+                    <ul id="image-gallery" class="gallery list-unstyled cS-hidden">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script>
+            var files = <?php echo $files; ?>;
+            var path = <?php echo $path; ?>;
+            var thumbpath = <?php echo $thumbpath; ?>
+
+            files.forEach(function(filename) {
+                $('#image-gallery').append('<li data-thumb=' + thumbpath + filename + '><img src=' + path + filename + ' /></li>');
+                console.log(filename);
+            });
+        </script>
+    </body>
+</html>
